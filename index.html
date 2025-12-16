@@ -529,6 +529,8 @@
         
         // 照片模式狀態旗標
         let isPhotoMode = false;
+        // 新增：照片模式切換的動畫變量 (0.0 = 粒子模式, 1.0 = 照片模式)
+        let photoModeSelector = 0.0;
 
         // 手動爆破變數
         let manualExplosionStrength = 0;
@@ -820,15 +822,18 @@
             const planeMaterial = new THREE.MeshBasicMaterial({ 
                 map: texture,
                 transparent: true,
-                side: THREE.DoubleSide
+                side: THREE.DoubleSide,
+                opacity: 0 // 初始透明度設為 0，由動畫控制
             });
 
             imagePlane = new THREE.Mesh(planeGeometry, planeMaterial);
-            imagePlane.visible = isPhotoMode; // 根據目前模式決定是否顯示
+            // 注意：這裡先設為 visible = true，但透明度為 0。
+            // 真正的顯示/隱藏由 animate 中的 photoModeSelector 決定
+            imagePlane.visible = false; 
             scene.add(imagePlane);
 
-            // 更新粒子可見度 (根據是否為 Photo Mode)
-            if(particles) particles.visible = !isPhotoMode;
+            // 粒子初始可見度
+            if(particles) particles.visible = true; 
             
             if (!isInit) {
                 // 上傳圖片後，使用隨機角度發射
@@ -877,10 +882,18 @@
                 // 防止觸發 click 或預設行為 (例如選取文字)
                 if(e.cancelable && e.type === 'touchstart') e.preventDefault();
                 
-                // 如果在照片模式，自動切回粒子模式
+                // --- 修改：如果在照片模式下按下 Explosion，自動切換回粒子模式 ---
                 if(isPhotoMode) {
+                    // 1. 切換狀態標記
+                    isPhotoMode = false;
+                    
+                    // 2. 更新按鈕 UI (讓它顯示"切換回照片模式"的狀態，即現在是粒子模式)
                     const modeBtn = document.getElementById('btn-mode-toggle');
-                    if(modeBtn) modeBtn.click();
+                    if(modeBtn) {
+                         // 切換成照片模式的按鈕文字 (現在是粒子模式，所以顯示"切換照片")
+                        modeBtn.innerHTML = '<i class="fas fa-image"></i> Photo Mode';
+                        modeBtn.classList.remove('active-photo');
+                    }
                 }
                 
                 isHoldingExplode = true;
@@ -934,7 +947,8 @@
                 });
             }
 
-            // --- 新增：綁定照片模式切換按鈕 ---
+            // --- 修改：綁定照片模式切換按鈕 ---
+            // 現在按鈕只負責切換狀態變數，動畫效果交給 animate() 處理
             const modeBtn = document.getElementById('btn-mode-toggle');
             if (modeBtn) {
                 modeBtn.addEventListener('click', (e) => {
@@ -942,23 +956,13 @@
                     isPhotoMode = !isPhotoMode;
                     
                     if (isPhotoMode) {
-                        // 修改處：切換成粒子模式的按鈕文字
+                        // 切換成粒子模式的按鈕文字 (現在是照片模式，所以顯示"切回粒子")
                         modeBtn.innerHTML = '<i class="fas fa-cubes"></i> Particle Mode';
                         modeBtn.classList.add('active-photo');
-                        
-                        // 切換為照片模式：隱藏粒子，顯示照片，減弱發光
-                        if (particles) particles.visible = false;
-                        if (imagePlane) imagePlane.visible = true;
-                        if (composer.bloomPass) composer.bloomPass.strength = 0.2; // 微微發光即可，太強會過曝
                     } else {
-                        // 修改處：切換成照片模式的按鈕文字
+                        // 切換成照片模式的按鈕文字 (現在是粒子模式，所以顯示"切換照片")
                         modeBtn.innerHTML = '<i class="fas fa-image"></i> Photo Mode';
                         modeBtn.classList.remove('active-photo');
-                        
-                        // 切換回粒子模式：顯示粒子，隱藏照片，恢復發光
-                        if (particles) particles.visible = true;
-                        if (imagePlane) imagePlane.visible = false;
-                        if (composer.bloomPass) composer.bloomPass.strength = params.bloomStrength;
                     }
                     
                     modeBtn.blur();
@@ -994,10 +998,7 @@
 
             folder2.add(params, 'bloomStrength', 0, 3).name('Glow Intensity').onChange(val => {
                 params.bloomStrength = val; // 更新 params 數值
-                // 只有在非照片模式下才即時更新 bloom 強度
-                if (!isPhotoMode && composer.bloomPass) {
-                    composer.bloomPass.strength = val;
-                }
+                // 注意：現在 bloom 強度也由 animate 迴圈進行插值，這裡只更新目標值
             });
         }
 
@@ -1188,8 +1189,8 @@
             }
 
             particles = new THREE.Points(geometry, material);
-            // 注意：這裡不直接 add(particles)，改為根據模式判斷
-            particles.visible = !isPhotoMode; 
+            // 這裡不直接隱藏/顯示，交給 animate 控制
+            particles.visible = true; 
             scene.add(particles);
         }
 
@@ -1291,76 +1292,105 @@
             // 累加時間給 Shader 使用
             time += dt;
 
-            // 處理手動爆破的衰減與維持
+            // --- 1. 處理模式切換動畫 (Photo Mode Transition) ---
+            const transitionSpeed = 3.0;
+            const targetSelector = isPhotoMode ? 1.0 : 0.0;
+            photoModeSelector += (targetSelector - photoModeSelector) * transitionSpeed * dt;
+
+            // --- 2. 處理手動爆破的衰減與維持 ---
             if (isHoldingExplode) {
-                // 長按時，強度快速上升並維持在 1.0
-                // 使用 lerp 平滑過渡
                 const attack = 8.0; 
                 manualExplosionStrength += (1.0 - manualExplosionStrength) * (1.0 - Math.exp(-attack * dt));
             } else {
-                // 放開時，自然衰減
                 if (manualExplosionStrength > 0) {
-                    const decay = 4.0; // 調整衰減速度，數值越小回彈越慢
+                    const decay = 4.0; 
                     manualExplosionStrength *= Math.exp(-decay * dt);
                     if (manualExplosionStrength < 0.001) manualExplosionStrength = 0;
                 }
             }
 
-            if (material) {
+            // --- 計算視覺混合狀態 (Visual Mix State) ---
+            // 當在照片模式 (photoModeSelector ~ 1.0) 且觸發爆破 (manualExplosionStrength > 0) 時
+            // 我們希望視覺上暫時回到粒子狀態，讓粒子顯現並爆開
+            // visualState: 1.0 = 完整照片, 0.0 = 完整粒子 (或爆破中的粒子)
+            let visualState = photoModeSelector * (1.0 - manualExplosionStrength);
+
+            // --- 3. 更新粒子狀態 ---
+            if (material && particles) {
                 material.uniforms.uTime.value = time;
-                // 結合手勢捏合強度 與 手動爆破強度
-                let totalPinch = Math.max(pinchStrength, manualExplosionStrength);
                 
-                // 平滑過渡 pinch 值 (同樣改為時間相關)
+                // 根據 visualState 計算不透明度
+                // visualState 越小 (越接近粒子模式或爆破中)，粒子越清楚
+                const particleOpacity = 1.0 - Math.pow(visualState, 2); 
+                material.uniforms.uOpacity.value = params.opacity * particleOpacity;
+                
+                // 當幾乎看不見時才隱藏，節省效能
+                particles.visible = particleOpacity > 0.01;
+
+                // --- 關鍵特效：Pinch 計算 ---
+                // 1. 手勢 Pinch
+                // 2. 切換模式的過場 (photoModeSelector * 2.0) -> 讓粒子在照片模式下保持展開狀態
+                // 3. 手動爆破 (manualExplosionStrength * 2.5) -> 強度加倍，確保在照片模式下能炸得更遠 (2.0 -> 2.5)
+                const transitionExplosion = photoModeSelector * 2.0;
+                const manualExplosion = manualExplosionStrength * 2.5;
+
+                // 取最大值作為最終的 Pinch 強度
+                let totalPinch = Math.max(pinchStrength, transitionExplosion, manualExplosion);
+                
+                // 平滑過渡 pinch 值
                 const pinchDecay = 5.0;
                 material.uniforms.uPinch.value += (totalPinch - material.uniforms.uPinch.value) * (1.0 - Math.exp(-pinchDecay * dt));
             }
 
-            // --- 開場穿梭動畫邏輯 (修改為全方位移動 + 時間基礎) ---
+            // --- 4. 更新圖片狀態 ---
+            if (imagePlane) {
+                // 圖片不透明度隨 visualState 變化
+                // 爆破時 visualState -> 0，圖片消失
+                imagePlane.material.opacity = Math.pow(visualState, 2);
+                imagePlane.visible = visualState > 0.01;
+
+                // 圖片縮放：爆破時 (visualState 變小) 稍微縮小，製造消散感
+                // 原本邏輯：粒子(0) -> 照片(1) 是 0.9 -> 1.0 (浮現)
+                // 爆破時：照片(1) -> 粒子(0) 是 1.0 -> 0.9 (縮小消散)
+                const scale = 0.9 + (0.1 * visualState);
+                imagePlane.scale.set(scale, scale, scale);
+            }
+
+            // --- 5. 更新 Bloom 強度 ---
+            if (composer.bloomPass) {
+                // 照片模式下 Bloom 較弱 (0.2)
+                // 粒子模式或爆破時 (visualState -> 0) Bloom 變強 (params.bloomStrength)
+                // 這樣爆破時會有強烈的能量感
+                 const targetBloom = 0.2 + (params.bloomStrength - 0.2) * (1.0 - visualState);
+                 composer.bloomPass.strength += (targetBloom - composer.bloomPass.strength) * 2.0 * dt;
+            }
+
+            // --- 開場穿梭動畫邏輯 ---
             if (isIntroAnimation) {
-                // 目標位置
+                // ... (保持原本的開場動畫邏輯不變) ...
                 const targetX = 0;
                 const targetY = 0; 
                 const targetZ = 150;
-
-                // --- 關鍵修正：將速度改為與時間掛鉤 (Frame Rate Independent) ---
-                // 這裡的邏輯是：無論 FPS 多少，每秒移動的比例是固定的
-                // baseFactor = 0.0055 大約對應 20-21 秒的飛行時間
                 const referenceFPS = 60;
                 const baseFactor = 0.0055; 
-                
-                // 計算經過時間 dt 後，應該移動多少比例
-                // 數學原理：(1 - speed)^frames = (1 - adjustedSpeed)
                 const timeAdjustedSpeed = 1 - Math.pow(1 - baseFactor, dt * referenceFPS);
 
-                // 平滑移動相機 (X, Y, Z 都要動)
                 camera.position.x += (targetX - camera.position.x) * timeAdjustedSpeed;
                 camera.position.y += (targetY - camera.position.y) * timeAdjustedSpeed;
                 camera.position.z += (targetZ - camera.position.z) * timeAdjustedSpeed;
-                
-                // 飛行過程中持續對焦中心
                 camera.lookAt(0, 0, 0); 
 
-                // 計算與目標點的距離
                 const dist = camera.position.distanceTo(new THREE.Vector3(targetX, targetY, targetZ));
                 
-                // 檢查是否接近目標
                 if (dist < 1.5) {
-                    // 1. 強制對齊目標點
                     camera.position.set(targetX, targetY, targetZ);
                     camera.lookAt(0, 0, 0); 
-                    
                     isIntroAnimation = false;
-                    
-                    // 2. 啟用控制器
                     controls.enabled = true;
-                    
-                    // 3. 關鍵修正：暫時關閉阻尼並更新，以消除切換瞬間的慣性跳動
                     controls.enableDamping = false;
                     controls.update(); 
-                    controls.enableDamping = true; // 恢復阻尼
+                    controls.enableDamping = true;
 
-                    // 4. 動畫結束，自動切換到照片模式
                     if (!isPhotoMode) {
                         const modeBtn = document.getElementById('btn-mode-toggle');
                         if (modeBtn) modeBtn.click();
@@ -1371,25 +1401,19 @@
                 controls.update();
 
                 if (handPresent) {
-                    // 手勢控制也加入時間差修正，讓操作更跟手，不會因為 FPS 不同而忽快忽慢
-                    const rotationSpeed = 3.0 * dt; // 調整旋轉速度系數
-                    const zoomSpeed = 200.0 * dt;   // 調整縮放速度系數 (注意：這裡是位移量，不是比例)
+                    const rotationSpeed = 3.0 * dt; 
+                    const zoomSpeed = 200.0 * dt;   
 
                     if(particles) {
                         particles.rotation.y += (targetRotationY - particles.rotation.y) * rotationSpeed;
                         particles.rotation.x += (targetRotationX - particles.rotation.x) * rotationSpeed;
                     }
-                    // 注意：手勢縮放通常是直接控制位置，這裡簡單用 lerp 或直接加減
-                    // 為了保持原本手感，這裡微調係數
                     camera.position.z += (targetCameraZ - camera.position.z) * (2.0 * dt);
                 } else {
                     if(particles && params.floating && !isPhotoMode) {
                         const speed = params.floatSpeed;
-                        
-                        // 旋轉阻尼也需要時間修正
                         const floatDamping = 1.0 * dt; 
 
-                        // time 已經是根據 dt 累加的，所以這裡的 sin/cos 波形會自動正確
                         const targetX = Math.sin(time * 0.3 * speed) * 0.15;
                         particles.rotation.x += (targetX - particles.rotation.x) * floatDamping;
 
