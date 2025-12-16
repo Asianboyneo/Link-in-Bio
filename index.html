@@ -448,8 +448,9 @@
     <div id="loading">Initializing Quantum Field...<br><span style="font-size:0.7em; opacity:0.6; letter-spacing: 1px;">Awaiting Input</span></div>
 
     <!-- 加入音訊元素 (已移除 loop 屬性) -->
+    <!-- 更新：背景音樂改為 background_music.mp3 -->
     <audio id="bg-music">
-        <source src="Artlist Musical Logos - Tribal Rhythm.mp3" type="audio/mpeg">
+        <source src="background_music.mp3" type="audio/mpeg">
     </audio>
 
     <div id="ui-layer">
@@ -534,8 +535,8 @@
         // 新增：爆破長按狀態
         let isHoldingExplode = false;
 
-        // 預設圖片路徑
-        const DEFAULT_IMAGE_PATH = '287069905_564270111773809_6459526836966162411_n.jpg';
+        // 更新：預設圖片改為 christmas_cat.jpg
+        const DEFAULT_IMAGE_PATH = 'christmas_cat.jpg';
 
         // --- 播放音樂的輔助函式 ---
         function playMusic(restart = false) {
