@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <!-- iOS 視口優化：viewport-fit=cover 是關鍵，讓內容延伸到瀏海區 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Cosmic Particles (Unified Space Glass UI)</title>
+    <title>ASIAN BOY Universe</title>
     
     <!-- 引入 Font Awesome 圖標庫 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -343,97 +343,55 @@
                 transform: translateX(-50%);
                 
                 /* 底部安全距離 */
-                bottom: 15px; 
-                bottom: calc(15px + env(safe-area-inset-bottom));
+                bottom: 20px; 
+                bottom: calc(20px + env(safe-area-inset-bottom));
                 
                 width: 92%; /* 寬度稍微撐開 */
-                padding: 0; /* 移除內距，讓按鈕自己撐空間 */           
-                border-radius: 0;
-
-                /* --- 手機版背景移除修正 --- */
-                background: none;
-                backdrop-filter: none;
-                -webkit-backdrop-filter: none;
-                border: none;
-                box-shadow: none;
+                padding: 15px;            
+                border-radius: 16px;
             }
             
             #ui-layer h1 {
-                font-size: 1.3rem;
-                margin-bottom: 12px;
-                padding-bottom: 10px;
-                /* 標題保持原樣，背景透明 */
+                font-size: 1.2rem;
+                margin-bottom: 8px;
+                padding-bottom: 8px;
             }
             
-            /* --- 社群按鈕區塊 --- */
-            .social-row {
-                margin-bottom: 12px;
-                gap: 10px;
-            }
-
-            /* --- 獨立毛玻璃：社群按鈕 --- */
             .social-btn {
-                width: 36px;
-                height: 36px;
-                font-size: 1.1rem;
-                
-                /* 獨立毛玻璃樣式 */
-                background: rgba(20, 25, 40, 0.65);
-                backdrop-filter: blur(12px);
-                -webkit-backdrop-filter: blur(12px);
-                border: 1px solid rgba(255, 255, 255, 0.15);
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-                border-radius: 10px;
+                width: 30px;
+                height: 30px;
+                font-size: 1rem;
             }
             
-            /* --- 功能按鈕區塊 --- */
+            .social-row {
+                margin-bottom: 10px;
+                gap: 8px;
+            }
+            
+            /* 修正：針對手機版按鈕進行縮小與排版調整，確保單行顯示 */
             .ui-footer-row {
                 flex-wrap: nowrap; /* 強制不換行 */
-                gap: 8px; /* 增加間距讓按鈕分離 */
+                gap: 4px; /* 縮小間距 */
                 justify-content: space-between; /* 均勻分佈 */
-                
-                /* 移除上方分隔線 */
-                border-top: none;
-                padding-top: 0;
             }
 
-            /* --- 獨立毛玻璃：功能按鈕 --- */
             .reset-btn, .mode-btn {
-                font-size: 11px;
-                padding: 0 8px;
-                height: 38px; /* 增加高度便於點擊 */
-                letter-spacing: 0.5px;
-                flex-shrink: 1;
+                font-size: 10px; /* 縮小字體 (約 0.65rem) */
+                padding: 6px 4px; /* 縮小內距 */
+                letter-spacing: 0; /* 減少字距 */
+                flex-shrink: 1; /* 允許空間不足時縮小 */
                 min-width: 0;
-                
-                /* 獨立毛玻璃樣式 */
-                background: rgba(20, 25, 40, 0.65);
-                backdrop-filter: blur(12px);
-                -webkit-backdrop-filter: blur(12px);
-                border: 1px solid rgba(255, 255, 255, 0.15);
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-                border-radius: 10px;
-                
-                /* 確保文字顏色清晰 */
-                color: rgba(255, 255, 255, 0.9);
-                margin: 0;
             }
 
-            /* 激活狀態需要更明顯一點 */
-            .mode-btn.active-photo, .reset-btn.active-music {
-                background: rgba(165, 180, 252, 0.35);
-                border-color: rgba(165, 180, 252, 0.6);
-                box-shadow: 0 0 15px rgba(165, 180, 252, 0.4);
-                color: #fff;
-            }
-
+            /* 確保圖示與文字的間距也縮小 */
             .reset-btn i, .mode-btn i {
-                margin-right: 3px;
+                margin-right: 2px;
             }
 
+            /* 音樂按鈕只有圖示，不需要縮太多，但防止被擠壓 */
             #btn-music {
                 flex-shrink: 0;
-                padding: 0 10px;
+                padding: 6px 8px;
             }
             
             .divider {
@@ -452,7 +410,7 @@
             .lil-gui {
                 --width: 260px;
                 font-size: 13px;
-                --widget-height: 28px;
+                --widget-height: 28px; /* 回復原本的觸控區 */
                 max-height: 50vh;
                 overflow-y: auto;
                 -webkit-overflow-scrolling: touch; 
@@ -477,17 +435,13 @@
 
     <!-- Import Map for Three.js -->
     <script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "three/": "https://esm.sh/three@^0.182.0/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
-  }
-}
-</script>
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
 </head>
 <body>
 
@@ -495,11 +449,11 @@
 
     <!-- 加入音訊元素 (已移除 loop 屬性) -->
     <audio id="bg-music">
-        <source src="background_music.mp3" type="audio/mpeg">
+        <source src="Artlist Musical Logos - Tribal Rhythm.mp3" type="audio/mpeg">
     </audio>
 
     <div id="ui-layer">
-        <h1>Link in Bio</h1>
+        <h1>ASIAN BOY VISION</h1>
         
         <!-- 社群按鈕 -->
         <div class="social-row">
@@ -554,6 +508,8 @@
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
         import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
+        // 移除 Firebase 相關引用
+
         // --- 全局變量 ---
         let scene, camera, renderer, composer, controls;
         let particles, geometry, material;
@@ -575,12 +531,11 @@
 
         // 手動爆破變數
         let manualExplosionStrength = 0;
-        
         // 新增：爆破長按狀態
         let isHoldingExplode = false;
 
         // 預設圖片路徑
-        const DEFAULT_IMAGE_PATH = 'christmas_cat.jpg';
+        const DEFAULT_IMAGE_PATH = '287069905_564270111773809_6459526836966162411_n.jpg';
 
         // --- 播放音樂的輔助函式 ---
         function playMusic(restart = false) {
@@ -695,7 +650,13 @@
                 // 3. 開啟動畫旗標
                 isIntroAnimation = true;
 
-                // 4. 重播音樂 (因為這是使用者點擊觸發的，所以瀏覽器會允許播放)
+                // 4. 強制切回粒子模式以展示動畫
+                if (isPhotoMode) {
+                     const modeBtn = document.getElementById('btn-mode-toggle');
+                     if(modeBtn) modeBtn.click();
+                }
+
+                // 5. 重播音樂 (因為這是使用者點擊觸發的，所以瀏覽器會允許播放)
                 playMusic(true);
             }
         };
@@ -707,6 +668,7 @@
         let pinchStrength = 0;
 
         init();
+        // initFirebase(); // 已移除 Firebase 統計功能
         initUI();
         initMediaPipe();
         initFileUpload();
@@ -735,7 +697,7 @@
             renderer.toneMapping = THREE.ReinhardToneMapping;
             container.appendChild(renderer.domElement);
 
-            // 初始化 OrbitControls (注意：要在 renderer 創建之後)
+            // 初始化 OrbitControls
             controls = new OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
@@ -881,6 +843,12 @@
                 controls.target.set(0, 0, 0); // 回復為 0,0,0
                 
                 isIntroAnimation = true; // 重新啟動穿梭動畫旗標
+
+                // 強制切回粒子模式
+                if (isPhotoMode) {
+                     const modeBtn = document.getElementById('btn-mode-toggle');
+                     if(modeBtn) modeBtn.click();
+                }
 
                 // 上傳新圖片時也重播音樂
                 playMusic(true);
@@ -1072,7 +1040,7 @@
                     finalWidth = displayWidth;
                     finalHeight = displayWidth / imgData.aspectRatio;
                 } else {
-                    finalWidth = displayHeight * currentImageData.aspectRatio;
+                    finalWidth = displayHeight * imgData.aspectRatio;
                     finalHeight = displayHeight;
                 }
 
@@ -1324,14 +1292,14 @@
 
             // 處理手動爆破的衰減與維持
             if (isHoldingExplode) {
-                // 長按時，強度快速上升並維持在 1.0 (使用時間差讓過渡更平滑)
-                // 使用 lerp: current = current + (target - current) * (1 - exp(-decay * dt))
-                const decay = 8.0;
-                manualExplosionStrength += (1.0 - manualExplosionStrength) * (1.0 - Math.exp(-decay * dt));
+                // 長按時，強度快速上升並維持在 1.0
+                // 使用 lerp 平滑過渡
+                const attack = 8.0; 
+                manualExplosionStrength += (1.0 - manualExplosionStrength) * (1.0 - Math.exp(-attack * dt));
             } else {
-                // 放開時，衰減
+                // 放開時，自然衰減
                 if (manualExplosionStrength > 0) {
-                    const decay = 4.0; // 調整衰減速度
+                    const decay = 4.0; // 調整衰減速度，數值越小回彈越慢
                     manualExplosionStrength *= Math.exp(-decay * dt);
                     if (manualExplosionStrength < 0.001) manualExplosionStrength = 0;
                 }
@@ -1351,13 +1319,17 @@
             if (isIntroAnimation) {
                 // 目標位置
                 const targetX = 0;
-                const targetY = 0; // 回復為 0
+                const targetY = 0; 
                 const targetZ = 150;
 
-                // --- 關鍵修正：將速度改為與時間掛鉤 ---
+                // --- 關鍵修正：將速度改為與時間掛鉤 (Frame Rate Independent) ---
+                // 這裡的邏輯是：無論 FPS 多少，每秒移動的比例是固定的
+                // baseFactor = 0.0055 大約對應 20-21 秒的飛行時間
                 const referenceFPS = 60;
-                // 修改處：將速度係數調降至 0.0055，使動畫時間延長至約 20-21 秒
                 const baseFactor = 0.0055; 
+                
+                // 計算經過時間 dt 後，應該移動多少比例
+                // 數學原理：(1 - speed)^frames = (1 - adjustedSpeed)
                 const timeAdjustedSpeed = 1 - Math.pow(1 - baseFactor, dt * referenceFPS);
 
                 // 平滑移動相機 (X, Y, Z 都要動)
@@ -1366,7 +1338,7 @@
                 camera.position.z += (targetZ - camera.position.z) * timeAdjustedSpeed;
                 
                 // 飛行過程中持續對焦中心
-                camera.lookAt(0, 0, 0); // 回復為 0,0,0
+                camera.lookAt(0, 0, 0); 
 
                 // 計算與目標點的距離
                 const dist = camera.position.distanceTo(new THREE.Vector3(targetX, targetY, targetZ));
@@ -1375,7 +1347,7 @@
                 if (dist < 1.5) {
                     // 1. 強制對齊目標點
                     camera.position.set(targetX, targetY, targetZ);
-                    camera.lookAt(0, 0, 0); // 回復為 0,0,0
+                    camera.lookAt(0, 0, 0); 
                     
                     isIntroAnimation = false;
                     
@@ -1386,6 +1358,12 @@
                     controls.enableDamping = false;
                     controls.update(); 
                     controls.enableDamping = true; // 恢復阻尼
+
+                    // 4. 動畫結束，自動切換到照片模式
+                    if (!isPhotoMode) {
+                        const modeBtn = document.getElementById('btn-mode-toggle');
+                        if (modeBtn) modeBtn.click();
+                    }
                 }
             } else {
                 // 正常模式下的控制邏輯
