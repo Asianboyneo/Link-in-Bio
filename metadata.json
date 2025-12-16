@@ -1,0 +1,7 @@
+{
+  "name": "ASIAN BOY Universe",
+  "description": "A 3D interactive particle system visualization with hand tracking capabilities, photo transformation modes, and an immersive space-themed UI.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
